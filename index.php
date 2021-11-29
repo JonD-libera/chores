@@ -290,7 +290,11 @@ function renderauth($mysqli,$emailuser,$emailpass,$emailfrom,$emailto,$emailrepl
         $statement->fetch();
       }
     }
-    $actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"."?assignment=".$assignment."&action=authenticate&userid=".$_REQUEST['userid']."&count=".$_REQUEST['count'];
+    //$actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"."?assignment=".$assignment."&action=authenticate&userid=".$_REQUEST['userid']."&count=".$_REQUEST['count'];
+    $actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]/admin.php";
+    $statement = $mysqli->prepare("insert into requests (date_requested, assignment_id, count, approval_status) values (NOW(), ?, ?, 0)");
+    $statement->bind_param('ii',$_REQUEST['assignment'],$_REQUEST['count']);
+    $statement->execute();
     $mail = new PHPMailer(true);
     try {
         // Server settings    
