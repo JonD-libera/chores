@@ -7,7 +7,7 @@
   <body>
 	  
 <?php
-#var_dump($_REQUEST);
+var_dump($_REQUEST);
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
@@ -145,7 +145,7 @@ function renderuser($mysqli)
   echo "<form method =\"POST\" id=\"namebutton\" action=\"./\"><input class=\"namebutton\" type=\"submit\" value=\"Return Home\"/></form>";
   $statement = $mysqli->prepare("select u.realname, c.name, c.description, a.id, case when 
   (select count(1) from activity act where act.assignment_id = a.id and act.date = date(now()) and act.user_id = a.assigned_user) > 0 then \"completebutton\" else \"incompletebutton\" end
-  from assignments a join users u on a.assigned_user = u.id join chores c on a.chore_id = c.id join schedule s on a.schedule_id = s.id where (( to_days(curdate()) - repeat_start_days) % repeat_interval_days = 0) and a.assigned_user = ?");
+  from assignments a left join users u on a.assigned_user = u.id join chores c on a.chore_id = c.id join schedule s on a.schedule_id = s.id where (( to_days(curdate()) - repeat_start_days) % repeat_interval_days = 0) and (a.assigned_user = ? or a.assigned_user is null)");
   #$statement = $mysqli->prepare("select u.realname, c.name, c.description, a.id from assignments a join users u on a.assigned_user = u.id join chores c on a.chore_id = c.id join schedule s on a.schedule_id = s.id where (( UNIX_TIMESTAMP(CURDATE()) - repeat_start) % repeat_interval = 0) and a.assigned_user = ?");
   $statement->bind_param('i', $_REQUEST['userid']);
   if ($statement->execute())
@@ -262,7 +262,7 @@ function renderauth($mysqli,$emailuser,$emailpass,$emailfrom,$emailto,$emailrepl
         <input name=\"action\" type=\"hidden\" id=\"i\" value=\"chorelist\"/>
         <input name=\"userid\" type=\"hidden\" id=\"i\" value=\"" . $_REQUEST['userid'] . "\"/>
         </form><p>\n";  
-  $statement = $mysqli->prepare("select c.name, c.description, c.pay, a.id, a.assigned_user from chores c join assignments a on a.chore_id = c.id join users u on a.assigned_user = u.id where a.assigned_user = ? and a.id = ?");
+  $statement = $mysqli->prepare("select c.name, c.description, c.pay, a.id, a.assigned_user from chores c join assignments a on a.chore_id = c.id left join users u on a.assigned_user = u.id where (a.assigned_user = ? or a.assigned_user is null) and a.id = ?");
   $statement->bind_param('ii', $_REQUEST['userid'], $_REQUEST['assignment']);
   if ($statement->execute())
   {
@@ -292,8 +292,8 @@ function renderauth($mysqli,$emailuser,$emailpass,$emailfrom,$emailto,$emailrepl
     }
     //$actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"."?assignment=".$assignment."&action=authenticate&userid=".$_REQUEST['userid']."&count=".$_REQUEST['count'];
     $actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]/admin.php";
-    $statement = $mysqli->prepare("insert into requests (date_requested, assignment_id, count, approval_status) values (NOW(), ?, ?, 0)");
-    $statement->bind_param('ii',$_REQUEST['assignment'],$_REQUEST['count']);
+    $statement = $mysqli->prepare("insert into requests (date_requested, assignment_id, count, approval_status, user_id) values (NOW(), ?, ?, 0, ?)");
+    $statement->bind_param('iii',$_REQUEST['assignment'],$_REQUEST['count'],$_REQUEST['userid']);
     $statement->execute();
     $mail = new PHPMailer(true);
     try {
@@ -350,10 +350,10 @@ function renderauth($mysqli,$emailuser,$emailpass,$emailfrom,$emailto,$emailrepl
               $statement->fetch();
               echo "Pay of  $" . $pay . " for ".$_REQUEST['count']." at ".$payrate."<br>";
               $statement = $mysqli->prepare("insert into activity (date, timestamp, assignment_id, user_id, payrate, quantity) values (CURDATE(), NOW(), ?, ?, ?, ?)");
-			  $statement->bind_param('iidi', $_REQUEST['assignment'], $_REQUEST['userid'], $payrate, $_REQUEST['count']);
-			  $statement->execute();
-			  $statement->store_result();
-			  echo $statement->num_rows;
+              $statement->bind_param('iidi', $_REQUEST['assignment'], $_REQUEST['userid'], $payrate, $_REQUEST['count']);
+              $statement->execute();
+              $statement->store_result();
+              echo $statement->num_rows;
             }
           }
         }
@@ -372,7 +372,9 @@ function renderauth($mysqli,$emailuser,$emailpass,$emailfrom,$emailto,$emailrepl
 <?php keypad();?>
 <input type="password" name="code" value="" maxlength="4" class="display" /><br>
 <?php
-    $statement = $mysqli->prepare("select c.name, c.description, c.pay, a.id, a.assigned_user, c.max from chores c join assignments a on a.chore_id = c.id join users u on a.assigned_user = u.id where a.assigned_user = ? and a.id = ?");
+    $statement = $mysqli->prepare("select c.name, c.description, c.pay, a.id, a.assigned_user, c.max 
+    from chores c join assignments a on a.chore_id = c.id left join users u on a.assigned_user = u.id 
+    where (a.assigned_user = ? or a.assigned_user is null) and a.id = ?");
     $statement->bind_param('ii', $_REQUEST['userid'], $_REQUEST['assignment']);
     if ($statement->execute())
     {
