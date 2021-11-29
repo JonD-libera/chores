@@ -2,11 +2,21 @@
   <head>
     <link rel="stylesheet" href="style.css">
     <title>Chores UI main page</title>
+    <meta name="viewport" content="width=device-width, initial-scale=0.9">
   </head>
   <body>
 	  
 <?php
+#var_dump($_REQUEST);
+use PHPMailer\PHPMailer\PHPMailer;
+use PHPMailer\PHPMailer\SMTP;
+use PHPMailer\PHPMailer\Exception;
+
+require_once __DIR__ . '/vendor/phpmailer/src/Exception.php';
+require_once __DIR__ . '/vendor/phpmailer/src/PHPMailer.php';
+require_once __DIR__ . '/vendor/phpmailer/src/SMTP.php';
 include_once ("./config.php");
+
 $mysqli = new mysqli($dbhost, $dbuser, $dbpass, $dbname);
 if ($mysqli->connect_errno)
 {
@@ -31,11 +41,11 @@ elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == "choredetail")
 }
 elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == "authenticate")
 {
-  renderauth($mysqli);
+  renderauth($mysqli,$emailuser,$emailpass,$emailfrom,$emailto,$emailreply);
 }
 elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == "choreapprove")
 {
-  renderauth($mysqli);
+  renderauth($mysqli,$emailuser,$emailpass,$emailfrom,$emailto,$emailreply);
 }
 if (!isset($_REQUEST['action']))
 {
@@ -149,7 +159,7 @@ function renderuser($mysqli)
       {
         echo "<form method =\"POST\" id=\"namebutton\" action=\"./\">
               <input class=\"".$buttonstyle."\" type=\"submit\" value=\"" . $chore . "\"/>              
-              <input name=\"action\" type=\"hidden\" id=\"i\" value=\"choredetail\"/>
+              <input name=\"action\" type=\"hidden\" id=\"i\" value=\"authenticate\"/>
               <input name=\"assignment\" type=\"hidden\" id=\"i\" value=\"" . $assignment . "\"/>
               <input name=\"userid\" type=\"hidden\" id=\"i\" value=\"" . $_REQUEST['userid'] . "\"/>
               </form><p>";
@@ -198,7 +208,7 @@ function renderallchores($mysqli)
                 echo "<label for=\"chore\">" . $name . "</label><br/>";
               }
         echo  "<input class=\"".$buttonstyle."\" type=\"submit\" value=\"" . $chore . " " . $chorecount . "\"/>
-              <input name=\"action\" type=\"hidden\" id=\"i\" value=\"choredetail\"/>
+              <input name=\"action\" type=\"hidden\" id=\"i\" value=\"authenticate\"/>
               <input name=\"assignment\" type=\"hidden\" id=\"i\" value=\"" . $assignment . "\"/>
               <input name=\"userid\" type=\"hidden\" id=\"i\" value=\"" . $userid . "\"/>
               </form>";
@@ -245,14 +255,73 @@ function renderchore($mysqli)
   }
 }
 
-function renderauth($mysqli)
+function renderauth($mysqli,$emailuser,$emailpass,$emailfrom,$emailto,$emailreply)
 {
+  echo "<form method =\"POST\" id=\"namebutton\" action=\"./\"><input class=\"namebutton\" type=\"submit\" value=\"Return Home\"/></form>";  
   echo "<form method =\"POST\" id=\"namebutton\" action=\"./\"><input class=\"namebutton\" type=\"submit\" value=\"Return to chore list\"/>
         <input name=\"action\" type=\"hidden\" id=\"i\" value=\"chorelist\"/>
         <input name=\"userid\" type=\"hidden\" id=\"i\" value=\"" . $_REQUEST['userid'] . "\"/>
-        </form><p>\n";
-  echo "<form method =\"POST\" id=\"namebutton\" action=\"./\"><input class=\"namebutton\" type=\"submit\" value=\"Return Home\"/></form><p>\n\n";
-  if (isset($_REQUEST['code']))
+        </form><p>\n";  
+  $statement = $mysqli->prepare("select c.name, c.description, c.pay, a.id, a.assigned_user from chores c join assignments a on a.chore_id = c.id join users u on a.assigned_user = u.id where a.assigned_user = ? and a.id = ?");
+  $statement->bind_param('ii', $_REQUEST['userid'], $_REQUEST['assignment']);
+  if ($statement->execute())
+  {
+    $statement->store_result();
+    $statement->bind_result($chore, $description, $pay, $assignment, $user);
+    if ($statement->num_rows > 0)
+    {
+      $statement->fetch();
+      echo "<h2>" . $chore . "</h2>";
+      echo "<p>" . $description . "</p>";
+      echo "<p>" . $pay . "</p>";
+    }
+  }  
+  if (isset($_REQUEST['emailbutton'])) 
+  {
+    #send an email to parents
+    $statement = $mysqli->prepare("select u.realname, c.name, a.id, (c.pay * ?), c.pay from assignments a join chores c on c.id = a.chore_id join users u on a.assigned_user = u.id where a.id = ?");
+    $statement->bind_param('ii',$_REQUEST['count'],$_REQUEST['assignment']);
+    if ($statement->execute())
+    {
+      $statement->store_result();
+      $statement->bind_result($username, $chorename, $assignment, $pay, $payrate);
+      if ($statement->num_rows > 0)
+      {
+        $statement->fetch();
+      }
+    }
+    $actual_link = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]$_SERVER[REQUEST_URI]"."?assignment=".$assignment."&action=authenticate&userid=".$_REQUEST['userid']."&count=".$_REQUEST['count'];
+    $mail = new PHPMailer(true);
+    try {
+        // Server settings    
+        $mail->isSMTP();
+        $mail->Host = 'smtp.gmail.com';
+        $mail->SMTPAuth = true;
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+        $mail->Port = 587;
+
+        $mail->Username = $emailuser; // YOUR gmail email
+        $mail->Password = $emailpass; // YOUR gmail password
+
+        // Sender and recipient settings
+        $mail->setFrom($emailfrom, 'Chores Console');
+        $mail->addAddress($emailto, 'Parents');
+        $mail->addReplyTo($emailreply, 'Chores Console'); // to set the reply to
+
+        // Setting the email content
+        $mail->IsHTML(true);
+        $mail->Subject = "Chore approval request from ".$username;
+        $mail->Body = $username. " has requested a chore approval for ". $_REQUEST['count'] ." of ". $chorename.".</p><p></p>Click here <a href=\"".$actual_link.
+        "\">here</a> if you would like to approve this request.</p>";
+        $mail->AltBody = 'Plain text version of approval request';
+
+        $mail->send();
+        echo "Email message sent.";
+    } catch (Exception $e) {
+        echo "Error in sending email. Mailer Error: {$mail->ErrorInfo}";
+    }    
+  }
+  elseif (isset($_REQUEST['code']))
   {
     $statement = $mysqli->prepare("select u.realname, u.id, u.pin from users u where u.id = ?");
     $statement->bind_param('i', $_REQUEST['approver']);
@@ -347,9 +416,12 @@ function renderauth($mysqli)
         {
           echo "<option value =\"" . $approverid . "\">" . $approvername . "</option>\n";
         }
-?></select><?php
+?></select></p><?php
       }
     }
+  echo "<input name=\"emailbutton\" id=\"emailbutton\" class=\"namebutton\" type=\"submit\" value=\"Ask parents approve\"/>";
+  }
+
 ?>
 <p id="message">VERIFYING...</p>
 </form>
@@ -375,15 +447,15 @@ function renderauth($mysqli)
     </script>
 
 <?php
-  }
+  
 }
 function renderbonus($mysqli)
 {
+  echo "<form method =\"POST\" id=\"namebutton\" action=\"./\"><input class=\"namebutton\" type=\"submit\" value=\"Return Home\"/></form>";  
   echo "<form method =\"POST\" id=\"namebutton\" action=\"./\"><input class=\"namebutton\" type=\"submit\" value=\"Return to chore list\"/>
         <input name=\"action\" type=\"hidden\" id=\"i\" value=\"chorelist\"/>
         <input name=\"userid\" type=\"hidden\" id=\"i\" value=\"" . $_REQUEST['userid'] . "\"/>
         </form><p>\n";
-  echo "<form method =\"POST\" id=\"namebutton\" action=\"./\"><input class=\"namebutton\" type=\"submit\" value=\"Return Home\"/></form><p>\n\n";
   if (isset($_REQUEST['code']))
   {
     $statement = $mysqli->prepare("select u.realname, u.id, u.pin from users u where u.id = ?");

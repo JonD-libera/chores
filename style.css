@@ -36,13 +36,13 @@ h2 {
 }
 h2::before {
   content: " ";
-  padding: 10px;
+  padding: 5px;
 }
 h3 {
   margin: 2em 0 0 0;
   color: #2e484c;
   font-family: 'Julius Sans One', sans-serif;
-  font-size: 1.8em;
+  font-size: 1.6em;
   font-weight: normal;
   text-transform: uppercase;
 }
@@ -57,11 +57,11 @@ p {
   background-color: #1766E7; /* Blue */
   border: none;
   color: white;
-  padding: 10px 30px;
+  padding: 5px 30px;
   text-align: center;
   text-decoration: none;
   display: inline-grid;
-  font-size: 15px;
+  font-size: 13px;
   width: 200px
 }
 
@@ -69,22 +69,22 @@ p {
   background-color: #4CAF50; /* Green */
   border: none;
   color: white;
-  padding: 10px 30px;
+  padding: 5px 30px;
   text-align: center;
   text-decoration: none;
   display: inline-grid;
-  font-size: 15px;
+  font-size: 13px;
   width: 200px
 }
 .incompletebutton {
   background-color: #FF6347 ; /* Red */
   border: none;
   color: white;
-  padding: 10px 30px;
+  padding: 5px 30px;
   text-align: center;
   text-decoration: none;
   display: inline-grid;
-  font-size: 15px;
+  font-size: 13px;
   width: 200px
 }
 #keypad {margin:10px; margin-top:20px;}

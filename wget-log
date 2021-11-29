@@ -1,0 +1,11 @@
+--2021-09-15 11:32:57--  https://formtools.org/download_file.php?file_type=core
+Resolving formtools.org (formtools.org)... 75.119.197.90
+Connecting to formtools.org (formtools.org)|75.119.197.90|:443... connected.
+HTTP request sent, awaiting response... 200 OK
+Length: 0 [text/html]
+Saving to: ‘download_file.php?file_type=core’
+
+download_file.php?file_type=core            [<=>                                                                           ]       0  --.-KB/s               download_file.php?file_type=core            [ <=>                                                                          ]       0  --.-KB/s    in 0s      
+
+2021-09-15 11:32:58 (0.00 B/s) - ‘download_file.php?file_type=core’ saved [0/0]
+
