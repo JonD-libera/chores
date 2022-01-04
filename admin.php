@@ -12,27 +12,59 @@ if ($mysqli->connect_errno)
   echo "Failed to connect to MySQL: " . $mysqli->connect_error;
   exit();
 }
-echo "<form method =\"POST\" id=\"namebutton\" action=\"./\"><input class=\"namebutton\" type=\"submit\" value=\"View today's list\"/>
-<input name=\"action\" type=\"hidden\" id=\"i\" value=\"allchores\"/></form>";
-$statement = $mysqli->prepare("select date, u.realname, sum(act.payrate * act.quantity) as pay, sum(quantity) from activity act join users u on u.id = act.user_id where date >= DATE_SUB(CURDATE(),INTERVAL 3 day) and date != curdate() group by u.realname, date order by date;");
+if (isset($_REQUEST['code'])) {
+    $statement = $mysqli->prepare("select u.realname, u.id, u.pin from users u where u.id = 1");
+    if ($statement->execute())
+    {
+      $statement->store_result();
+      $statement->bind_result($approvername, $approver, $code);
+      if ($statement->num_rows > 0)
+      {
+        $statement->fetch();
+        if ($code == $_REQUEST['code'])
+        {
+          $statement = $mysqli->prepare("insert into activity (date, timestamp, assignment_id, user_id, payrate, quantity) select CURDATE(), NOW(), r.assignment_id, r.user_id, c.pay, r.count from requests r join assignments a on r.assignment_id = a.id join chores c on a.chore_id = c.id where r.id = ?");          
+          foreach($_REQUEST['req'] as $key => $val) 
+          {
+            if ($val = "approve") 
+            {
+              $mysqli->query("update requests set approval_status = 1 where id = ".$key);
+              $statement->bind_param('i',$key);
+              $statement->execute();
+            } elseif ($val = "deny") {
+              $mysqli->query("update requests set approval_status = 2 where id = ".$key);
+            }
+          }
+        } else {
+          echo "<p>Code invalid</p>";
+        }
+      }
+    }
+  }
+$statement = $mysqli->prepare("select u.realname, c.name, r.date_requested, r.approval_status, r.count, r.id
+                               from requests r 
+                               join assignments a on r.assignment_id = a.id 
+                               left join users u on r.user_id = u.id 
+                               join chores c on a.chore_id = c.id
+                               where r.approval_status = 0;");
 $statement->execute();
 $statement->store_result();
-$statement->bind_result($date, $name, $pay, $count);
+$statement->bind_result($name, $chore, $date, $status, $count, $requestid);
 if ($statement->num_rows > 0)
 {
+  ?>
+  <form method="POST"><?php
   while ($statement->fetch())
   {
-    echo "<p>".$name." earned ".$pay." on " .$date. " for ".$count." chores</p>\n";
+    echo "<p>".$name." requsts approval for ".$chore." on " .$date. " for ".$count." chores.
+    <label style=\"direction:rtl;\" value=\"10\">Approve</label><input type=\"radio\" checked /name=\"req[".$requestid."]\" value=\"approve\">
+    <label style=\"direction:rtl;\" value=\"20\">Deny</label><input type=\"radio\" name=\"req[".$requestid."]\" value=\"deny\">
+    <label style=\"direction:rtl;\" value=\"30\">Hold</label><input type=\"radio\" name=\"req[".$requestid."]\" value=\"hold\"></p>\n";
   }
+  ?>
+    <input type="password" name="code"><br/>
+    <input class="namebutton" type="submit" value="Submit"/>
+  </form><?php
 }
-$statement = $mysqli->prepare("select date, u.realname, sum(act.payrate * act.quantity) as pay, sum(quantity) from activity act join users u on u.id = act.user_id where date >= DATE_SUB(CURDATE(),INTERVAL 3 day) and date != curdate() group by u.realname, date order by date;");
-$statement->execute();
-$statement->store_result();
-$statement->bind_result($date, $name, $pay, $count);
-if ($statement->num_rows > 0)
-{
-  while ($statement->fetch())
-  {
-    echo "<p>".$name." earned ".$pay." on " .$date. " for ".$count." chores</p>\n";
-  }
-}
+?>
+</body>

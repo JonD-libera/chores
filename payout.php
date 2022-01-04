@@ -24,7 +24,7 @@ if ($mysqli->connect_errno)
     }
   }
   echo "<br>";
-  $statement = $mysqli->prepare("select date(date), u.realname, act.payrate * act.quantity as pay, act.id, ch.name from activity act join users u on u.id = act.user_id join assignments asg on act.assignment_id = asg.id join chores ch on asg.chore_id = ch.id where date >= DATE_SUB(CURDATE(),INTERVAL 10 day) and date != curdate() and paid != 1 order by u.realname,  date;");
+  $statement = $mysqli->prepare("select date(date), u.realname, act.payrate * act.quantity as pay, act.id, ch.name from activity act join users u on u.id = act.user_id join assignments asg on act.assignment_id = asg.id join chores ch on asg.chore_id = ch.id where date >= DATE_SUB(CURDATE(),INTERVAL 14 day) and date != curdate() and paid != 1 order by u.realname,  date;");
   $statement->execute();
   $statement->store_result();
   $statement->bind_result($date, $name, $pay, $id, $cname);

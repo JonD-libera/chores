@@ -188,3 +188,12 @@ p {
 .select-css:disabled:hover, .select-css[aria-disabled=true] {
     border-color: #aaa;
 }
+.parents-wrapper {
+    display: grid;
+    grid-template-columns: 1fr 2fr 3fr;
+}
+.parents-form {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    grid-gap: 20px;
+}

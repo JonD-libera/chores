@@ -7,7 +7,7 @@
   <body>
 	  
 <?php
-var_dump($_REQUEST);
+//var_dump($_REQUEST);
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
