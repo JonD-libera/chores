@@ -349,7 +349,7 @@ function renderauth($mysqli,$emailuser,$emailpass,$emailfrom,$emailto,$emailrepl
             {
               $statement->fetch();
               echo "Pay of  $" . $pay . " for ".$_REQUEST['count']." at ".$payrate."<br>";
-              $statement = $mysqli->prepare("insert into activity (date, timestamp, assignment_id, user_id, payrate, quantity) values (CURDATE(), NOW(), ?, ?, ?, ?)");
+              $statement = $mysqli->prepare("insert into activity (date, timestamp, assignment_id, user_id, payrate, quantity, approval_status) values (CURDATE(), NOW(), ?, ?, ?, ?, 1)");
               $statement->bind_param('iidi', $_REQUEST['assignment'], $_REQUEST['userid'], $payrate, $_REQUEST['count']);
               $statement->execute();
               $statement->store_result();
@@ -479,7 +479,7 @@ function renderbonus($mysqli)
           $payrate = ".50";
           $pay = $_REQUEST['count'] * $payrate;
           echo "Pay of  $" . $pay . " for ".$_REQUEST['count']." at ".$payrate."<br>";
-          $statement = $mysqli->prepare("insert into activity (date, timestamp, assignment_id, user_id, payrate, quantity) values (CURDATE(), NOW(), ?, ?, ?, ?)");
+          $statement = $mysqli->prepare("insert into activity (date, timestamp, assignment_id, user_id, payrate, quantity, approval_status) values (CURDATE(), NOW(), ?, ?, ?, ?, 1)");
           $statement->bind_param('iidi', $_REQUEST['assignment'], $_REQUEST['userid'], $payrate, $_REQUEST['count']);
           $statement->execute();
           $statement->store_result();

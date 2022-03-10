@@ -87,6 +87,17 @@ p {
   font-size: 13px;
   width: 200px
 }
+.pendingbutton {
+  background-color: #f9a825 ; /* Orange */
+  border: none;
+  color: white;
+  padding: 5px 30px;
+  text-align: center;
+  text-decoration: none;
+  display: inline-grid;
+  font-size: 13px;
+  width: 200px
+}
 #keypad {margin:10px; margin-top:20px;}
 
 #keypad tr td {

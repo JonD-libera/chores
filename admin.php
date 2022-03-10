@@ -23,7 +23,7 @@ if (isset($_REQUEST['code'])) {
         $statement->fetch();
         if ($code == $_REQUEST['code'])
         {
-          $statement = $mysqli->prepare("insert into activity (date, timestamp, assignment_id, user_id, payrate, quantity) select CURDATE(), NOW(), r.assignment_id, r.user_id, c.pay, r.count from requests r join assignments a on r.assignment_id = a.id join chores c on a.chore_id = c.id where r.id = ?");          
+          $statement = $mysqli->prepare("insert into activity (date, timestamp, assignment_id, user_id, payrate, quantity) select DATE(r.date_requested), r.date_requested, r.assignment_id, r.user_id, c.pay, r.count from requests r join assignments a on r.assignment_id = a.id join chores c on a.chore_id = c.id where r.id = ?");          
           foreach($_REQUEST['req'] as $key => $val) 
           {
             if ($val = "approve") 
