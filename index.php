@@ -1,8 +1,9 @@
 <html>
   <head>
-    <link rel="stylesheet" href="style.css">
-    <title>Chores UI main page</title>
-    <meta name="viewport" content="width=device-width, initial-scale=0.9">
+    	<link rel="stylesheet" href="style.css">
+    	<title>Chores UI main page</title>
+    	<meta name="viewport" content="width=device-width, initial-scale=0.9">
+	  <meta http-equiv="refresh" content="120">
   </head>
   <body>
 	  
