@@ -16,7 +16,7 @@ use PHPMailer\PHPMailer\Exception;
 require_once __DIR__ . '/vendor/phpmailer/src/Exception.php';
 require_once __DIR__ . '/vendor/phpmailer/src/PHPMailer.php';
 require_once __DIR__ . '/vendor/phpmailer/src/SMTP.php';
-include_once ("./config.php");
+include_once (dirname(__FILE__)."/config.php");
 
 $mysqli = new mysqli($dbhost, $dbuser, $dbpass, $dbname);
 if ($mysqli->connect_errno)
@@ -154,8 +154,14 @@ function renderuser($mysqli)
 ?><div class="Header"><?php echo "<h2>" . welcome() . " " . $name . "</h2>"; ?></div><?php
   echo "<form method =\"POST\" id=\"namebutton\" action=\"./\"><input class=\"namebutton\" type=\"submit\" value=\"Return Home\"/></form>";
   $statement = $mysqli->prepare("select u.realname, c.name, c.description, a.id, case when 
-  (select count(1) from activity act where act.assignment_id = a.id and act.date = date(now()) and act.user_id = a.assigned_user) > 0 then \"completebutton\" else \"incompletebutton\" end
+  (select count(1) from activity act where act.assignment_id = a.id and act.date = date(now()) and act.user_id = a.assigned_user) > 0 then \"completebutton\" 
+  when (select count(1) from requests r where r.assignment_id = a.id and date(r.date_requested) = date(now()) and r.user_id = u.id)  > 0 then \"pendingbutton\"
+  else \"incompletebutton\" end
   from assignments a left join users u on a.assigned_user = u.id join chores c on a.chore_id = c.id join schedule s on a.schedule_id = s.id where (( to_days(curdate()) - repeat_start_days) % repeat_interval_days = 0) and (a.assigned_user = ? or a.assigned_user is null)");
+  
+  #select u.realname, c.name, c.description, a.id, case when 
+  #(select count(1) from activity act where act.assignment_id = a.id and act.date = date(now()) and act.user_id = a.assigned_user) > 0 then \"completebutton\" else \"incompletebutton\" end
+  #from assignments a left join users u on a.assigned_user = u.id join chores c on a.chore_id = c.id join schedule s on a.schedule_id = s.id where (( to_days(curdate()) - repeat_start_days) % repeat_interval_days = 0) and (a.assigned_user = ? or a.assigned_user is null)");
   #$statement = $mysqli->prepare("select u.realname, c.name, c.description, a.id from assignments a join users u on a.assigned_user = u.id join chores c on a.chore_id = c.id join schedule s on a.schedule_id = s.id where (( UNIX_TIMESTAMP(CURDATE()) - repeat_start) % repeat_interval = 0) and a.assigned_user = ?");
   $statement->bind_param('i', $_REQUEST['userid']);
   if ($statement->execute())
@@ -195,8 +201,10 @@ function renderallchores($mysqli)
 {
   echo "<form method =\"POST\" id=\"namebutton\" action=\"./\"><input class=\"namebutton\" type=\"submit\" value=\"Return Home\"/></form>";
   $statement = $mysqli->prepare("select u.realname, u.id, c.name, c.description, a.id, 
-  case when (select count(1) from activity act where act.assignment_id = a.id and act.date = date(now()) and act.user_id = a.assigned_user) > 0    
-  then 'completebutton' else 'incompletebutton'
+  case when (select count(1) from activity act where act.assignment_id = a.id and act.date = date(now()) and act.user_id = a.assigned_user) > 0 
+  then 'completebutton' 
+  when (select count(1) from requests r where r.assignment_id = a.id and date(r.date_requested) = date(now()) and r.user_id = u.id)  > 0 then \"pendingbutton\"
+  else 'incompletebutton'
   end, (select sum(quantity) from activity act where act.assignment_id = a.id and act.date = date(now()) and act.user_id = a.assigned_user) as quantity 
   from assignments a join users u on a.assigned_user = u.id join chores c on a.chore_id = c.id join schedule s on a.schedule_id = s.id 
   where (( to_days(curdate()) - repeat_start_days) % repeat_interval_days = 0) and c.type = 1 order by u.id");
