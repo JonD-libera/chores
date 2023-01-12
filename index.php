@@ -372,6 +372,10 @@ function renderauth($mysqli,$emailuser,$emailpass,$emailfrom,$emailto,$emailrepl
               $statement->execute();
               $statement->store_result();
               echo $statement->num_rows;
+              $statement = $mysqli->prepare("insert into requests (date_requested, assignment_id, user_id, count, approval_status) values (now(), ?, ?, ?, 1)");
+              $statement->bind_param('iii',$_REQUEST['assignment'], $_REQUEST['userid'], $_REQUEST['count']);
+              $statement->execute();
+              $statement->store_result();
             }
           }
         }
