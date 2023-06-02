@@ -62,7 +62,7 @@ p {
   text-decoration: none;
   display: inline-grid;
   font-size: 13px;
-  width: 200px
+  width: 250px
 }
 
 .completebutton {
@@ -74,7 +74,7 @@ p {
   text-decoration: none;
   display: inline-grid;
   font-size: 13px;
-  width: 200px
+  width: 250px
 }
 .incompletebutton {
   background-color: #FF6347 ; /* Red */
@@ -85,7 +85,7 @@ p {
   text-decoration: none;
   display: inline-grid;
   font-size: 13px;
-  width: 200px
+  width: 250px
 }
 .pendingbutton {
   background-color: #f9a825 ; /* Orange */
@@ -96,7 +96,7 @@ p {
   text-decoration: none;
   display: inline-grid;
   font-size: 13px;
-  width: 200px
+  width: 250px
 }
 #keypad {margin:10px; margin-top:20px;}
 

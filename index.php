@@ -156,7 +156,7 @@ function renderuser($mysqli)
   $statement = $mysqli->prepare("select u.realname, c.name, c.description, a.id, case when 
   (select count(1) from activity act where act.assignment_id = a.id and act.date = date(now()) and act.user_id = a.assigned_user) > 0 then \"completebutton\" 
   when (select count(1) from requests r where r.assignment_id = a.id and date(r.date_requested) = date(now()) and r.user_id = u.id)  > 0 then \"pendingbutton\"
-  else \"incompletebutton\" end
+  else \"incompletebutton\" end, c.pay
   from assignments a left join users u on a.assigned_user = u.id join chores c on a.chore_id = c.id join schedule s on a.schedule_id = s.id where (( to_days(curdate()) - repeat_start_days) % repeat_interval_days = 0) and (a.assigned_user = ? or a.assigned_user is null)");
   
   #select u.realname, c.name, c.description, a.id, case when 
@@ -167,14 +167,14 @@ function renderuser($mysqli)
   if ($statement->execute())
   {
     $statement->store_result();
-    $statement->bind_result($name, $chore, $description, $assignment, $buttonstyle);
+    $statement->bind_result($name, $chore, $description, $assignment, $buttonstyle, $pay);
     if ($statement->num_rows > 0)
     {
       echo "<p>You have the following chores today</p>";
       while ($statement->fetch())
       {
         echo "<form method =\"POST\" id=\"namebutton\" action=\"./\">
-              <input class=\"".$buttonstyle."\" type=\"submit\" value=\"" . $chore . "\"/>              
+              <input class=\"".$buttonstyle."\" type=\"submit\" value=\"" . $chore . " for ".$pay." \"/>              
               <input name=\"action\" type=\"hidden\" id=\"i\" value=\"authenticate\"/>
               <input name=\"assignment\" type=\"hidden\" id=\"i\" value=\"" . $assignment . "\"/>
               <input name=\"userid\" type=\"hidden\" id=\"i\" value=\"" . $_REQUEST['userid'] . "\"/>
@@ -205,13 +205,14 @@ function renderallchores($mysqli)
   then 'completebutton' 
   when (select count(1) from requests r where r.assignment_id = a.id and date(r.date_requested) = date(now()) and r.user_id = u.id)  > 0 then \"pendingbutton\"
   else 'incompletebutton'
-  end, (select sum(quantity) from activity act where act.assignment_id = a.id and act.date = date(now()) and act.user_id = a.assigned_user) as quantity 
+  end, (select sum(quantity) from activity act where act.assignment_id = a.id and act.date = date(now()) and act.user_id = a.assigned_user) as quantity,
+  c.pay 
   from assignments a join users u on a.assigned_user = u.id join chores c on a.chore_id = c.id join schedule s on a.schedule_id = s.id 
   where (( to_days(curdate()) - repeat_start_days) % repeat_interval_days = 0) and c.type = 1 order by u.id");
   if ($statement->execute())
   {
     $statement->store_result();
-    $statement->bind_result($name, $userid, $chore, $description, $assignment, $buttonstyle, $quantity);
+    $statement->bind_result($name, $userid, $chore, $description, $assignment, $buttonstyle, $quantity, $pay);
     if ($statement->num_rows > 0)
     {
       echo "<p>Here are all the chores for today</p>";
@@ -225,7 +226,7 @@ function renderallchores($mysqli)
               if ($userid != $lid) {
                 echo "<label for=\"chore\">" . $name . "</label><br/>";
               }
-        echo  "<input class=\"".$buttonstyle."\" type=\"submit\" value=\"" . $chore . " " . $chorecount . "\"/>
+        echo  "<input class=\"".$buttonstyle."\" type=\"submit\" value=\"" . $chore . " " . $chorecount . " for " .$pay."\"/>
               <input name=\"action\" type=\"hidden\" id=\"i\" value=\"authenticate\"/>
               <input name=\"assignment\" type=\"hidden\" id=\"i\" value=\"" . $assignment . "\"/>
               <input name=\"userid\" type=\"hidden\" id=\"i\" value=\"" . $userid . "\"/>
