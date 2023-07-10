@@ -52,6 +52,10 @@ elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == "wiki")
 {
   renderwiki($mysqli);
 }
+elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == "transfers")
+{
+  redirect("transfers.home.jdsnetwork.com");
+}
 if (!isset($_REQUEST['action']))
 {
   renderhome($mysqli);
@@ -84,6 +88,8 @@ function renderhome($mysqli)
   }
  echo "<form method =\"POST\" id=\"namebutton\" action=\"./\"><input class=\"namebutton\" type=\"submit\" value=\"View the Wiki\"/>
   <input name=\"action\" type=\"hidden\" id=\"i\" value=\"wiki\"/></form>";
+  echo "<form method =\"POST\" id=\"namebutton\" action=\"./\"><input class=\"namebutton\" type=\"submit\" value=\"Submit a Transfer\"/>
+  <input name=\"action\" type=\"hidden\" id=\"i\" value=\"transfers\"/></form>";
 ?></div><div class="Right">
     <div class="report-container" id="weather-report">
     </div>
@@ -620,5 +626,10 @@ function welcome()
 
   }
 
+}
+
+function redirect($url) {
+    header("Location: $url");
+    exit;
 }
 ?>
