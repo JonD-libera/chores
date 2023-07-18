@@ -55,48 +55,52 @@ p {
 
 .namebutton {
   background-color: #1766E7; /* Blue */
-  border: none;
+  border: solid white;
   color: white;
-  padding: 5px 30px;
+  padding: 5px;
   text-align: center;
   text-decoration: none;
   display: inline-grid;
   font-size: 13px;
-  width: 250px
+  width: 250px;
+  margin: 5px
 }
 
 .completebutton {
   background-color: #4CAF50; /* Green */
-  border: none;
+  border: solid white;
   color: white;
   padding: 5px 30px;
   text-align: center;
   text-decoration: none;
   display: inline-grid;
   font-size: 13px;
-  width: 250px
+  width: 250px;
+  margin: 5px
 }
 .incompletebutton {
   background-color: #FF6347 ; /* Red */
-  border: none;
+  border: solid white;
   color: white;
   padding: 5px 30px;
   text-align: center;
   text-decoration: none;
   display: inline-grid;
   font-size: 13px;
-  width: 250px
+  width: 250px;
+  margin: 5px
 }
 .pendingbutton {
   background-color: #f9a825 ; /* Orange */
-  border: none;
+  border: solid white;
   color: white;
   padding: 5px 30px;
   text-align: center;
   text-decoration: none;
   display: inline-grid;
   font-size: 13px;
-  width: 250px
+  width: 250px;
+  margin: 5px
 }
 #keypad {margin:10px; margin-top:20px;}
 
