@@ -57,50 +57,56 @@ p {
   background-color: #1766E7; /* Blue */
   border: solid white;
   color: white;
-  padding: 5px;
   text-align: center;
   text-decoration: none;
   display: inline-grid;
   font-size: 13px;
   width: 250px;
-  margin: 5px
+  margin: 5px;
+  padding: 5px;
+  border-radius: 15px;
 }
 
 .completebutton {
   background-color: #4CAF50; /* Green */
   border: solid white;
   color: white;
-  padding: 5px 30px;
   text-align: center;
   text-decoration: none;
   display: inline-grid;
   font-size: 13px;
   width: 250px;
-  margin: 5px
+  margin: 5px;
+  padding: 5px;
+  border-radius: 15px;
 }
+
 .incompletebutton {
   background-color: #FF6347 ; /* Red */
   border: solid white;
   color: white;
-  padding: 5px 30px;
   text-align: center;
   text-decoration: none;
   display: inline-grid;
   font-size: 13px;
   width: 250px;
-  margin: 5px
+  margin: 5px;
+  padding: 5px;
+  border-radius: 15px;
 }
+
 .pendingbutton {
   background-color: #f9a825 ; /* Orange */
   border: solid white;
   color: white;
-  padding: 5px 30px;
   text-align: center;
   text-decoration: none;
   display: inline-grid;
   font-size: 13px;
   width: 250px;
-  margin: 5px
+  margin: 5px;
+  padding: 5px;
+  border-radius: 15px;
 }
 #keypad {margin:10px; margin-top:20px;}
 

@@ -1,0 +1,53 @@
+body {
+  margin: 0;
+  padding: 0;
+  background-color: black;
+  color: white;
+  font-family: 'Arial', sans-serif;
+}
+
+.lcars-bar {
+  background-color: #4c0aa3;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  padding-left: 20px;
+}
+
+.lcars-elbow-left-bottom {
+  border-radius: 0 0 100% 0;
+}
+
+.lcars-title {
+  font-size: 1.5em;
+  margin-left: 10px;
+}
+
+.lcars-container {
+  display: flex;
+}
+
+.lcars-column {
+  flex: 0 0 200px; /* Width of the left pane */
+  background-color: #000000;
+  width: 200px;
+  display: flex;
+  flex-direction: column;
+}
+
+.lcars-button {
+  background-color: #3366CC;
+  border: none;
+  border-radius: 25px;  /* This line makes the corners rounded */
+  color: white;
+  text-align: center;
+  padding: 12px;
+  margin: 2px;
+  cursor: pointer;
+}
+
+.lcars-main-content {
+  margin-left: 220px;
+  margin-top: 60px;
+  padding: 20px;
+}

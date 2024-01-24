@@ -8,11 +8,39 @@
   <body>
 	  
 <?php
+// Check if the HTTP_X_AUTH_USER variable exists and is one of the allowed values
+if (isset($_SERVER['HTTP_X_AUTH_USER'])) {
+    $allowedUsers = [
+        '113768195357871960192@accounts.google.com',
+        '113768195357871960193@accounts.google.com'
+    ];
+
+    $user = $_SERVER['HTTP_X_AUTH_USER'];
+
+    if (in_array($user, $allowedUsers)) {
+        // Check if the source IP address is 192.168.5.10
+        $sourceIP = $_SERVER['REMOTE_ADDR'];
+        
+        if ($sourceIP === '192.168.5.20') {
+            // Access is allowed
+            echo "Access granted!";
+        } else {
+            // Source IP is not allowed
+            echo "Error: Source IP not authorized.";
+        }
+    } else {
+        // User is not allowed
+        echo "Error: User not authorized.";
+    }
+} else {
+    // HTTP_X_AUTH_USER header is missing
+    echo "Error: HTTP_X_AUTH_USER header not found.";
+}
 //var_dump($_REQUEST);
 use PHPMailer\PHPMailer\PHPMailer;
 use PHPMailer\PHPMailer\SMTP;
 use PHPMailer\PHPMailer\Exception;
-
+#print_r($_SERVER);
 require_once __DIR__ . '/vendor/phpmailer/src/Exception.php';
 require_once __DIR__ . '/vendor/phpmailer/src/PHPMailer.php';
 require_once __DIR__ . '/vendor/phpmailer/src/SMTP.php';

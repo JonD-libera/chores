@@ -4,6 +4,7 @@
     <title>Chores UI parents page</title>
   </head>
   <body>
+What is life?
 <?php
 include_once ("./config.php");
 $mysqli = new mysqli($dbhost, $dbuser, $dbpass, $dbname);
@@ -68,5 +69,51 @@ if ($statement->num_rows > 0)
     <input class="namebutton" type="submit" value="Submit"/>
   </form><?php
 }
+  echo "<form method =\"POST\" id=\"namebutton\" action=\"./\"><input class=\"namebutton\" type=\"submit\" value=\"Return Home\"/></form>";
+  $statement = $mysqli->prepare("select u.realname, u.id, c.name, c.description, a.id, 
+  case when (select count(1) from activity act where act.assignment_id = a.id and act.date = DATE_SUB(date(now(), INTERVAL 1 DAY)) and act.user_id = a.assigned_user) > 0 
+  then 'completebutton' 
+  when (select count(1) from requests r where r.assignment_id = a.id and date(r.date_requested) = DATE_SUB(date(now(), INTERVAL 1 DAY)) and r.user_id = u.id)  > 0 then \"pendingbutton\"
+  else 'incompletebutton'
+  end, (select sum(quantity) from activity act where act.assignment_id = a.id and act.date = DATE_SUB(date(now(), INTERVAL 1 DAY)) and act.user_id = a.assigned_user) as quantity,
+  c.pay 
+  from assignments a join users u on a.assigned_user = u.id join chores c on a.chore_id = c.id join schedule s on a.schedule_id = s.id 
+  where (( to_days(curdate()-1) - repeat_start_days) % repeat_interval_days = 0) and c.type = 1 order by u.id");
+  if ($statement->execute())
+  {
+    $statement->store_result();
+    $statement->bind_result($name, $userid, $chore, $description, $assignment, $buttonstyle, $quantity, $pay);
+    if ($statement->num_rows > 0)
+    {
+      echo "<p>Here are all the chores for today</p>";
+      while ($statement->fetch())
+      {
+        $chorecount = "";
+        if ( $quantity > 1 ) {          
+          $chorecount = "x ".$quantity;
+        }
+        echo "<form class =\"hlistform\" method =\"POST\" id=\"namebutton\" action=\"./\">";
+              if ($userid != $lid) {
+                echo "<label for=\"chore\">" . $name . "</label><br/>";
+              }
+        echo  "<input class=\"".$buttonstyle."\" type=\"submit\" value=\"" . $chore . " " . $chorecount . " for " .$pay."\"/>
+              <input name=\"action\" type=\"hidden\" id=\"i\" value=\"authenticate\"/>
+              <input name=\"assignment\" type=\"hidden\" id=\"i\" value=\"" . $assignment . "\"/>
+              <input name=\"userid\" type=\"hidden\" id=\"i\" value=\"" . $userid . "\"/>
+              </form>";
+              if ($userid != $lid) {                
+                $lid = $userid;
+              }
+      }
+    }
+    else
+    {
+      echo "<p>You don't have any chores right now</p>";
+    }
+  }
+  else
+  {
+    echo ('Error executing MySQL query: ' . $statement->error);
+  }
 ?>
 </body>

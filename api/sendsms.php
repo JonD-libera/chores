@@ -2,9 +2,9 @@
 include_once ("../config.php");
 
 $method = "sendSMS";
-$did = $_GET['did'];
-$dst = $_GET['dst'];
-$message = urlencode($_GET['message']);
+$did = urlencode($_REQUEST['did']);
+$dst = urlencode($_REQUEST['dst']);
+$message = urlencode($_REQUEST['message']);
 $ch = curl_init();
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true );
 $url = "https://voip.ms/api/v1/rest.php?api_username={$voipmsapiuser}&api_password={$voipmsapikey}&method={$method}&did={$did}&dst={$dst}&message={$message}";
