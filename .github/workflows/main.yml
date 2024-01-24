@@ -3,7 +3,13 @@ name: Install PHP Repo
 on:
   push:
     branches:
-      - main # Replace with your repository's default branch
+      - master # Replace with your repository's default branch
+  workflow_dispatch: # Add this trigger
+    inputs: # Define inputs for manual triggering (optional)
+      environment:
+        description: 'Environment to deploy to'
+        required: true
+        default: 'production'
 
 jobs:
   deploy:
