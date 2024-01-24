@@ -1,0 +1,21 @@
+name: Install PHP Repo
+
+on:
+  push:
+    branches:
+      - main # Replace with your repository's default branch
+
+jobs:
+  deploy:
+    runs-on: self-hosted # This ensures that the workflow runs on your local runner
+
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v2
+
+      - name: Install PHP Repository
+        run: |
+          # Clone the PHP repository to /var/www/chores
+          sudo git clone https://github.com/JonD-libera/chores.git /var/www/chores
+
+      # You can add more steps for configuration, dependencies, or other tasks as needed
