@@ -1,94 +1,63 @@
 <?php
-require_once('config.php');
+// Assuming db.php contains your database connection logic
+include 'config.php';
 
-$conn = new mysqli($dbhost, $dbuser, $dbpass, $dbname);
+// Check if the form has been submitted
+if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    // Collect form data
+    $repeatStart = $_POST['repeat_start'];
+    $repeatInterval = $_POST['repeat_interval'];
+    $description = $_POST['description'];
+    $repeatStartDays = $_POST['repeat_start_days'];
+    $repeatIntervalDays = $_POST['repeat_interval_days'];
+    $repeatSkipDays = $_POST['repeat_skip_days'];
 
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    // Assuming $pdo is your PDO database connection from db.php
+    // Add or Edit logic here. For simplicity, we're just showing an insert. Adjust for edit by checking if an ID was passed.
+    $sql = "INSERT INTO schedule (repeat_start, repeat_interval, description, repeat_start_days, repeat_interval_days, repeat_skip_days) VALUES (?, ?, ?, ?, ?, ?)";
+    $stmt= $pdo->prepare($sql);
+    $stmt->execute([$repeatStart, $repeatInterval, $description, $repeatStartDays, $repeatIntervalDays, $repeatSkipDays]);
+
+    echo "Schedule saved successfully!";
+    // Redirect or inform the user of success or handle errors
 }
-
-// Current week range
-$monday = strtotime("last monday");
-$sunday = strtotime("next sunday") + 86399;
-
-$days = [
-    "Monday" => [],
-    "Tuesday" => [],
-    "Wednesday" => [],
-    "Thursday" => [],
-    "Friday" => [],
-    "Saturday" => [],
-    "Sunday" => [],
-];
-
-// Query database
-$sql = "select u.realname, u.id, c.name, c.description, a.id, s.repeat_interval, s.repeat_start, 
-  case when (select count(1) from activity act where act.assignment_id = a.id and act.date = date(now()) and act.user_id = a.assigned_user) > 0 
-  then 'completebutton' 
-  when (select count(1) from requests r where r.assignment_id = a.id and date(r.date_requested) = date(now()) and r.user_id = u.id)  > 0 then \"pendingbutton\"
-  else 'incompletebutton'
-  end, (select sum(quantity) from activity act where act.assignment_id = a.id and act.date = date(now()) and act.user_id = a.assigned_user) as quantity,
-  c.pay 
-  from assignments a join users u on a.assigned_user = u.id join chores c on a.chore_id = c.id join schedule s on a.schedule_id = s.id 
-  where (( to_days(curdate()) - repeat_start_days) % repeat_interval_days = 0) and c.type = 1 order by u.id";
-$result = $conn->query($sql);
-
-if ($result->num_rows > 0) {
-    while($row = $result->fetch_assoc()) {
-        $repeatStart = $row['repeat_start'];
-        $repeatInterval = $row['repeat_interval'];
-        
-        // Validate values
-        if ($repeatStart <= 0 || $repeatInterval <= 0) {
-            continue;
-        }
-        
-        // Calculate instances for this row
-        for ($time = $repeatStart; $time <= $sunday; $time += $repeatInterval) {
-            if ($time < $monday) {
-                continue;
-            }
-            $day = date("l", $time);
-            $days[$day][] = date("Y-m-d H:i:s", $time);
-        }
-    }
-} else {
-    echo "0 results";
-}
-
-$conn->close();
 ?>
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    // Function to set the repeat interval
+    function setRepeatInterval(days) {
+        document.getElementById("repeat_interval_days").value = days;
+    }
 
-<!DOCTYPE html>
-<html>
-<head>
-    <title>Week Schedule</title>
-</head>
-<body>
-
-<h1>This Week's Instances</h1>
-
-<table border="1">
-    <thead>
-        <tr>
-            <?php foreach ($days as $day => $times): ?>
-                <th><?php echo $day; ?></th>
-            <?php endforeach; ?>
-        </tr>
-    </thead>
-    <tbody>
-        <?php 
-        $maxRows = max(array_map('count', $days));
-        for ($i = 0; $i < $maxRows; $i++): ?>
-            <tr>
-                <?php foreach ($days as $day => $times): ?>
-                    <td><?php echo isset($times[$i]) ? $times[$i] : ''; ?></td>
-                <?php endforeach; ?>
-            </tr>
-        <?php endfor; ?>
-    </tbody>
-</table>
-
-</body>
-</html>
-
+    // Event listeners for the buttons
+    document.getElementById("daily").addEventListener("click", function() { setRepeatInterval(1); });
+    document.getElementById("everyOtherDay").addEventListener("click", function() { setRepeatInterval(2); });
+    document.getElementById("weekly").addEventListener("click", function() { setRepeatInterval(7); });
+    document.getElementById("biWeekly").addEventListener("click", function() { setRepeatInterval(14); });
+});
+</script>
+<form action="" method="post">
+    <label for="repeat_start">Repeat Start Date:</label>
+    <input type="date" id="repeat_start" name="repeat_start" required>
+    <br>
+    <label for="repeat_interval">Repeat Interval:</label>
+    <input type="number" id="repeat_interval" name="repeat_interval" required>
+    <button type="button" id="daily">Daily</button>
+    <button type="button" id="everyOtherDay">Every other day</button>
+    <button type="button" id="weekly">Weekly</button>
+    <button type="button" id="biWeekly">Bi-Weekly</button>
+    <br>
+    <label for="description">Description:</label>
+    <input type="text" id="description" name="description" required>
+    <br>
+    <label for="repeat_start_days">Repeat Start Days:</label>
+    <input type="number" id="repeat_start_days" name="repeat_start_days" required>
+    <br>
+    <label for="repeat_interval_days">Repeat Interval Days:</label>
+    <input type="number" id="repeat_interval_days" name="repeat_interval_days" required>
+    <br>
+    <label for="repeat_skip_days">Repeat Skip Days:</label>
+    <input type="number" id="repeat_skip_days" name="repeat_skip_days" required>
+    <br>
+    <input type="submit" value="Save Schedule">
+</form>
