@@ -82,7 +82,7 @@ elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == "wiki")
 }
 elseif (isset($_REQUEST['action']) && $_REQUEST['action'] == "transfers")
 {
-  redirect("transfers.home.jdsnetwork.com");
+  redirect("http://transfers.home.jdsnetwork.com");
 }
 if (!isset($_REQUEST['action']))
 {
