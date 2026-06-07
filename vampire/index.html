@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Vampire Ball Tracker</title>
+  <style>
+    body {
+      font-family: "Georgia", serif;
+      background-color: #111;
+      color: #eee;
+      text-align: center;
+      padding: 2rem;
+    }
+    h1 {
+      color: crimson;
+      text-shadow: 2px 2px 5px black;
+    }
+    .progress-container {
+      width: 80%;
+      background-color: #333;
+      border-radius: 25px;
+      margin: 2rem auto;
+      box-shadow: 0 0 10px #000;
+    }
+    .progress-bar {
+      height: 30px;
+      width: 0%;
+      background: linear-gradient(to right, crimson, darkred);
+      border-radius: 25px;
+      text-align: center;
+      line-height: 30px;
+      color: white;
+      font-size: 1.2rem;
+      transition: width 0.5s ease-in-out;
+    }
+    .milestones {
+      margin-top: 2rem;
+      font-size: 1.1rem;
+    }
+    .milestones li {
+      list-style: none;
+      margin: 5px 0;
+    }
+  </style>
+</head>
+<body>
+  <h1>🌙 Vampire Fund Tracker 🩸</h1>
+  <p>Goal: $2000</p>
+  
+  <div class="progress-container">
+    <div class="progress-bar" id="progress-bar">🌑</div>
+  </div>
+  
+  <p id="amount">Current: $0</p>
+
+  <ul class="milestones">
+    <li>🌑 $250 — New Moon</li>
+    <li>🌒 $500 — Waxing Crescent</li>
+    <li>🌓 $1000 — First Quarter</li>
+    <li>🌔 $1500 — Waxing Gibbous</li>
+    <li>🌕 $2000 — Full Moon</li>
+  </ul>
+
+  <script>
+    // === UPDATE THIS AMOUNT EACH WEEK ===
+    const currentAmount = 115;  // <--- change this number
+    const goal = 2000;
+
+    // calculate progress
+    const percent = Math.min((currentAmount / goal) * 100, 100);
+
+    // determine moon phase
+    function getMoonPhase(p) {
+      if (p >= 100) return "🌕";
+      if (p >= 75) return "🌔";
+      if (p >= 50) return "🌓";
+      if (p >= 25) return "🌒";
+      return "🌑";
+    }
+
+    // update bar + text
+    const bar = document.getElementById("progress-bar");
+    bar.style.width = percent + "%";
+    bar.textContent = getMoonPhase(percent) + " " + Math.floor(percent) + "%";
+
+    document.getElementById("amount").textContent = "Current: $" + currentAmount;
+  </script>
+</body>
+</html>
+
+
+
+

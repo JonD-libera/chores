@@ -37,7 +37,7 @@ if ($mysqli->connect_errno)
       $rows[$id]['name'] = $name;
       $rows[$id]['pay'] = $pay;
       $rows[$id]['id'] = $id;
-      $rows[$id]['name'] = $cname;
+      $rows[$id]['chorename'] = $cname;
       $pays[$name] = $pays[$name] + $pay;
       echo $name." earned ". $pay ." on ".$date." for ".$cname."<br>\n";
     }
@@ -46,6 +46,42 @@ if ($mysqli->connect_errno)
   foreach ( $pays as $name=>$pay ) {
     echo $name . " earned $". money_format('%.2n',$pay). " since last payout.<br>\n";
   }
+  
+  //Build chore breakdown by user and type
+  $choreBreakdown = [];
+  foreach ($rows as $row) {
+    $userName = $row['name'];
+    $choreName = $row['chorename'];
+    $pay = $row['pay'];
+    
+    if (!isset($choreBreakdown[$userName])) {
+      $choreBreakdown[$userName] = [];
+    }
+    if (!isset($choreBreakdown[$userName][$choreName])) {
+      $choreBreakdown[$userName][$choreName] = ['total' => 0, 'count' => 0];
+    }
+    $choreBreakdown[$userName][$choreName]['total'] += $pay;
+    $choreBreakdown[$userName][$choreName]['count']++;
+  }
+  
+  // Print breakdown by user and chore type
+  if (!empty($choreBreakdown)) {
+    echo "<br><h3>Breakdown by User and Chore Type:</h3>";
+    foreach ($choreBreakdown as $userName => $chores) {
+      echo "<h4>" . htmlspecialchars($userName) . ":</h4>";
+      $userTotal = 0;
+      $userCount = 0;
+      foreach ($chores as $choreName => $data) {
+        $total = $data['total'];
+        $count = $data['count'];
+        echo "&nbsp;&nbsp;" . htmlspecialchars($choreName) . ": " . $count . " times, $" . money_format('%.2n', $total) . "<br>\n";
+        $userTotal += $total;
+        $userCount += $count;
+      }
+      echo "&nbsp;&nbsp;<strong>Total: " . $userCount . " chores, $" . money_format('%.2n', $userTotal) . "</strong><br><br>\n";
+    }
+  }
+  
   //Build the form for payout
   echo "<form method =\"POST\" id=\"namebutton\" action=\"./payout.php\">\n";
   foreach ( $rows as $row ) {
